@@ -1,7 +1,7 @@
 defmodule CareyesWeb.Router do
   use CareyesWeb, :router
 
-  pipeline :browser do
+  pipeline :public do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -10,14 +10,33 @@ defmodule CareyesWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :private do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {CareyesWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug CareyesWeb.Plugs.Auth
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  # Rotas que todos podem ver, como login, registro, etc.
   scope "/", CareyesWeb do
-    pipe_through :browser
+    pipe_through :public
+
+    live "/login", UserLoginLive
+  end
+
+  # Rotas que SÓ usuários logados podem ver.
+  scope "/", CareyesWeb do
+    pipe_through :private
 
     get "/", PageController, :home
+    get "/logout", SessionController, :delete
   end
 
   # Other scopes may use custom stacks.
