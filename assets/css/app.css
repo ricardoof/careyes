@@ -89,6 +89,10 @@
   --border: 1.5px;
   --depth: 1;
   --noise: 0;
+  --color-font: #525259;
+  --color-purple: #6e45e2;
+  --color-blue: #88d3ce;
+  --color-gradient-strong: linear-gradient(135deg, rgba($cy-blue, .75) 0%,rgba($cy-purple, .75) 100%);
 }
 
 /* Add variants based on LiveView classes */

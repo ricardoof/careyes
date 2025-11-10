@@ -54,7 +54,7 @@ defmodule CareyesWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through :public
 
       live_dashboard "/dashboard", metrics: CareyesWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
