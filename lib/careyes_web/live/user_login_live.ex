@@ -6,7 +6,6 @@ defmodule CareyesWeb.UserLoginLive do
   @impl true
   def mount(_params, _session, socket) do
     form = to_form(%{"usuario" => "", "senha" => ""})
-
     {:ok, assign(socket, form: form)}
   end
 
@@ -45,6 +44,7 @@ defmodule CareyesWeb.UserLoginLive do
               />
               <button
                 type="submit"
+                phx-disable-with="Entrando..."
                 class="mt-3 h-10 w-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-6 text-[15px] font-bold text-white normal-case transition-all hover:from-cyan-600 hover:to-blue-700"
               >
                 Entrar no CareYes
@@ -80,12 +80,24 @@ defmodule CareyesWeb.UserLoginLive do
   @impl true
   def handle_event("login", %{"usuario" => email, "senha" => password}, socket) do
     case Accounts.authenticate_user(email, password) do
-      {:ok, user} ->
+      # Sucesso: O Mock/API retorna um mapa com "user" e "token"
+      {:ok, api_response} ->
+        user = api_response["user"]
+        # Dependendo de como você fez o mock, o token pode estar aninhado ou direto
+        # Vamos tentar pegar de forma segura
+        token_data = api_response["token"]
+        token = if is_map(token_data), do: token_data["token"], else: token_data
+
         {:noreply,
          socket
-         |> put_flash(:info, "Login realizado com sucesso!")
-         |> push_redirect(to: "/", session: %{"user_id" => user.id})}
+         |> put_flash(:info, "Login realizado!")
+         # Redireciona para /acompanhamentos e salva ID e Token na sessão
+         |> push_redirect(to: "/acompanhamentos", session: %{
+              "user_id" => user["id"],
+              "auth_token" => token
+            })}
 
+      # Erro: Login falhou
       {:error, _reason} ->
         {:noreply,
          socket

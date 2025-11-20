@@ -67,6 +67,12 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+    # Pega a URL da variável de ambiente OU usa a de produção como padrão
+    adonis_url = System.get_env("ADONIS_API_URL") || "https://apicareyes.medyes.com.br/api"
+
+    config :careyes, :adonis_api,
+      base_url: adonis_url
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

@@ -37,6 +37,7 @@ defmodule CareyesWeb.Router do
 
     get "/", PageController, :home
     get "/logout", SessionController, :delete
+    live "/acompanhamentos", AcompanhamentoLive.Index
   end
 
   # Other scopes may use custom stacks.

@@ -26,7 +26,7 @@ config :careyes, CareyesWeb.Endpoint,
   secret_key_base: "a6Z67Kjb9amwLClzZAwaZ2cCfccMaI0x+V6/f8mhQHVlpIHgG1bFwrkPPBjvE0K4",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:careyes, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:careyes, ~w(--watch)]}
+    tailwind: {Tailwind, :install_and_run, [:careyes, ~w(--config=js/tailwind.config.js --watch)]}
   ]
 
 # ## SSL Support
@@ -86,3 +86,7 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Configuração da API Adonis para Desenvolvimento
+config :careyes, :adonis_api,
+  base_url: "http://127.0.0.1:3322/api"
