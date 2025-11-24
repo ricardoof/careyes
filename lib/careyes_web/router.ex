@@ -24,6 +24,16 @@ defmodule CareyesWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/api", CareyesWeb do
+    pipe_through :api
+
+    # Grupo "Usuario"
+    scope "/usuario" do
+      # Rota: POST /api/usuario/login-usuario
+      post "/login-usuario", UsuarioController, :login_usuario
+    end
+  end
+
   # Rotas que todos podem ver, como login, registro, etc.
   scope "/", CareyesWeb do
     pipe_through :public

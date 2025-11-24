@@ -89,4 +89,4 @@ config :swoosh, :api_client, false
 
 # Configuração da API Adonis para Desenvolvimento
 config :careyes, :adonis_api,
-  base_url: "http://127.0.0.1:3322/api"
+  base_url: "https://careyes-backend.onrender.com/api"
