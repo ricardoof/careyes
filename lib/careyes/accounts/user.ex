@@ -1,21 +1,35 @@
 defmodule Careyes.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Bcrypt
 
   schema "users" do
-    field :usuario, :string # Ex: "joao.silva" (sem o prefixo)
+    field :usuario, :string
     field :password_hash, :string
-    field :tipo, :string # Ex: "institucional"
+    field :tipo, :string
     field :bloqueado, :boolean, default: false
-
-    # Campo para guardar o JSON de configurações que o Adonis retornava
     field :configuracoes, :map
-
     field :instituicao_id, :integer
 
-    # Campo virtual apenas para receber a senha no cadastro (se houver)
     field :password, :string, virtual: true
 
-    timestamps()
+    timestamps(type: :utc_datetime)
+  end
+
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:usuario, :password, :tipo, :bloqueado, :configuracoes, :instituicao_id])
+    |> validate_required([:usuario, :password, :tipo, :instituicao_id])
+    |> put_password_hash()
+  end
+
+  # Esta função deve estar definida DENTRO do módulo, mas pode ser privada (defp)
+  defp put_password_hash(changeset) do
+    case get_change(changeset, :password) do
+      password when is_binary(password) ->
+        put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
+      _ ->
+        changeset
+    end
   end
 end
