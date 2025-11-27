@@ -1,71 +1,66 @@
 defmodule Careyes.Accounts do
+  import Ecto.Query, warn: false
   alias Careyes.Repo
   alias Careyes.Accounts.User
-  alias Careyes.Institutions.Instituicao # Supondo que você criará este Schema
-  alias Bcrypt
+  alias Careyes.Institutions.Instituicao
+  alias Bcrypt # Certifique-se de ter {:bcrypt_elixir, "~> 3.0"} no mix.exs
 
-  # Função principal que traduz o `loginUsuario` do Adonis
-  def login_com_prefixo(usuario_completo, senha) do
-    with {:ok, prefixo, usuario_nome} <- separar_prefixo(usuario_completo),
+  def login_com_prefixo(usuario_input, senha) do
+    # Usamos `with` para garantir que todos os passos funcionem em sequência
+    with {:ok, prefixo, usuario_sem_prefixo} <- separar_prefixo(usuario_input),
          {:ok, instituicao} <- buscar_instituicao(prefixo),
-         {:ok, user} <- buscar_usuario(usuario_nome, instituicao.id),
+         {:ok, user} <- buscar_usuario(usuario_sem_prefixo, instituicao.id),
          :ok <- verificar_bloqueio(user, instituicao),
-         :ok <- verificar_senha(user, senha),
-         :ok <- verificar_permissao_familia(user, instituicao) do
+         :ok <- verificar_senha(user, senha) do
 
-      # Se chegou aqui, passou por todas as validações do Adonis!
-
-      # Gerar Token (Aqui usamos um simples, mas em prod use Phoenix.Token ou Guardian)
+      # Sucesso! Gera o token
       token = Phoenix.Token.sign(CareyesWeb.Endpoint, "user_auth", user.id)
 
-      # Retornamos os dados prontos para o Controller
-      {:ok, %{
-        user: user,
-        instituicao: instituicao,
-        token: token
-      }}
+      # Retorna o pacote completo para o controller
+      {:ok, %{user: user, instituicao: instituicao, token: token}}
+    else
+      # Se qualquer passo falhar, retorna o erro
+      error -> error
     end
   end
 
-  # --- Funções Privadas (Passo a passo do Adonis) ---
+  # --- Funções Privadas (A Lógica detalhada) ---
 
-  # JS: if ((usuario_prefixo || '').indexOf('_') === -1)
-  defp separar_prefixo(str) do
-    case String.split(str, "_", parts: 2) do
+  # 1. Separa "my_joao.silva" -> "my" e "joao.silva"
+  defp separar_prefixo(input) do
+    case String.split(input, "_", parts: 2) do
       [prefixo, nome] -> {:ok, prefixo, nome}
-      _ -> {:error, :forbidden, "Usuario inválido"}
+      _ -> {:error, :bad_request, "Formato de usuário inválido"}
     end
   end
 
-  # JS: Instituicao.query().where('prefixo', `${prefixo}_`).first()
+  # 2. Busca a Instituição pelo prefixo (adicionando o "_" que o banco espera)
   defp buscar_instituicao(prefixo) do
-    # Nota: No Adonis ele busca por "prefixo_", no Elixir faremos igual
     prefixo_busca = "#{prefixo}_"
-
     case Repo.get_by(Instituicao, prefixo: prefixo_busca) do
-      nil -> {:error, :bad_request, "Usuario inválido"} # Mensagem original do Adonis
-      instituicao -> {:ok, instituicao}
+      nil -> {:error, :bad_request, "Instituição não encontrada"}
+      inst -> {:ok, inst}
     end
   end
 
-  # JS: Usuario.query().where('usuario', usuario).where('instituicao_id', ...).first()
+  # 3. Busca o usuário que pertence àquela instituição
   defp buscar_usuario(nome, instituicao_id) do
     case Repo.get_by(User, usuario: nome, instituicao_id: instituicao_id) do
-      nil -> {:error, :forbidden, "Usuario não cadastrado"}
+      nil -> {:error, :forbidden, "Usuário não cadastrado"}
       user -> {:ok, user}
     end
   end
 
-  # JS: if (user.bloqueado && instituicao.bloqueado)
+  # 4. Verifica bloqueios
   defp verificar_bloqueio(user, instituicao) do
-    if user.bloqueado && instituicao.bloqueado do
+    if user.bloqueado || instituicao.bloqueado do
       {:error, :forbidden, "Sem permissões de acesso"}
     else
       :ok
     end
   end
 
-  # JS: if (!await Hash.verify(senha, user.senha))
+  # 5. Verifica senha
   defp verificar_senha(user, senha) do
     if Bcrypt.verify_pass(senha, user.password_hash) do
       :ok
@@ -73,20 +68,4 @@ defmodule Careyes.Accounts do
       {:error, :forbidden, "Dados inválidos"}
     end
   end
-
-  # JS: if (user.configuracoes.permissao === 'paciente' && !hasAdditional...)
-  defp verificar_permissao_familia(user, instituicao) do
-    # Supondo que o campo configuracoes seja um Map no banco
-    permissao = user.configuracoes["permissao"]
-
-    # Lógica simulada do hasAdditional (teria que ver o que essa função faz no JS)
-    # Vamos assumir que passa por enquanto
-    if permissao == "paciente" && !tem_adicional?(instituicao) do
-      {:error, :forbidden, "A empresa não utiliza o serviço de compartilhamento..."}
-    else
-      :ok
-    end
-  end
-
-  defp tem_adicional?(_instituicao), do: true # Implementar lógica real depois
 end

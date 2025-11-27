@@ -27,10 +27,9 @@ defmodule CareyesWeb.Router do
   scope "/api", CareyesWeb do
     pipe_through :api
 
-    # Grupo "Usuario"
     scope "/usuario" do
-      # Rota: POST /api/usuario/login-usuario
-      post "/login-usuario", UsuarioController, :login_usuario
+      # Rota exata do seu curl
+      post "/login-usuario", Api.UsuarioController, :login_usuario
     end
   end
 
