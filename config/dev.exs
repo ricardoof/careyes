@@ -2,8 +2,8 @@ import Config
 
 # Configure your database
 config :careyes, Careyes.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "careyes", # Usuário padrão do MySQL
+  password: "careyes",     # Senha padrão (vazia) ou a sua senha
   hostname: "localhost",
   database: "careyes_dev",
   stacktrace: true,
