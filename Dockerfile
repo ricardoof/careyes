@@ -1,5 +1,5 @@
 # --- Estágio 1: Builder (Compilação) ---
-FROM elixir:1.14-alpine as builder
+FROM elixir:1.16-alpine as builder
 
 # Instala dependências de build no sistema operacional
 RUN apk add --no-cache build-base git nodejs npm
