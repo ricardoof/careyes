@@ -1,0 +1,12 @@
+_build
+deps
+.git
+.gitignore
+assets/node_modules
+priv/static/assets
+test
+.formatter.exs
+.env
+.env.*
+*.log
+crash.dump
