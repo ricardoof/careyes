@@ -5,7 +5,7 @@ defmodule Careyes.Accounts.User do
 
   schema "usuarios" do
     field :usuario, :string
-    field :password_hash, :string
+    #field :password_hash, :string
     field :tipo, :string
     field :bloqueado, :boolean, default: false
     field :configuracoes, :map
