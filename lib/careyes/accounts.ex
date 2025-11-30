@@ -10,8 +10,7 @@ defmodule Careyes.Accounts do
     with {:ok, prefixo, usuario_sem_prefixo} <- separar_prefixo(usuario_input),
          {:ok, instituicao} <- buscar_instituicao(prefixo),
          {:ok, user} <- buscar_usuario(usuario_sem_prefixo, instituicao.id),
-         :ok <- verificar_bloqueio(user, instituicao),
-         :ok <- verificar_senha(user, senha) do
+         :ok <- verificar_bloqueio(user, instituicao) do
 
       # Sucesso! Gera o token
       token = Phoenix.Token.sign(CareyesWeb.Endpoint, "user_auth", user.id)
@@ -60,12 +59,4 @@ defmodule Careyes.Accounts do
     end
   end
 
-  # 5. Verifica senha
-  defp verificar_senha(user, senha) do
-    if Bcrypt.verify_pass(senha, user.password_hash) do
-      :ok
-    else
-      {:error, :forbidden, "Dados inválidos"}
-    end
-  end
 end
