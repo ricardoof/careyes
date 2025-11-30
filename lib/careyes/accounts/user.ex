@@ -13,7 +13,7 @@ defmodule Careyes.Accounts.User do
 
     field :password, :string, virtual: true
 
-    timestamps(type: :utc_datetime)
+    #timestamps(type: :utc_datetime)
   end
 
   def changeset(user, attrs) do
