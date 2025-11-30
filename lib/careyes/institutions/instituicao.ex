@@ -7,6 +7,6 @@ defmodule Careyes.Institutions.Instituicao do
     field :prefixo, :string # Ex: "my_"
     field :bloqueado, :boolean, default: false
 
-    timestamps()
+    #timestamps()
   end
 end
