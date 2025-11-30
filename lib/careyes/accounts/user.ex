@@ -3,7 +3,7 @@ defmodule Careyes.Accounts.User do
   import Ecto.Changeset
   alias Bcrypt
 
-  schema "users" do
+  schema "usuarios" do
     field :usuario, :string
     field :password_hash, :string
     field :tipo, :string
